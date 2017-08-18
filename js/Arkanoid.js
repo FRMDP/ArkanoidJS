@@ -151,10 +151,11 @@ function Arkanoid(canvas) {
 
 		if (this.bullet.y + this.bullet.radius > canvas.height) {
 			this.bullet.speed = 3;
-			LIVES = LIVES - 1;
+			LIVES -= 1;
 			if (LIVES > 0) {
 				this.restartGame();
 			} else if (LIVES <= 0) {
+				this.bullet.dir = Movement.NONE;
 				this.gameOver = true;
 			}
 		}
