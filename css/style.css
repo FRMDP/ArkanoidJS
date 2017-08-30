@@ -1,0 +1,10 @@
+div.resetFrame {
+  width: 640px;
+  height: 40px;
+}
+button.resetBtn {
+  background-color: #cccccc;
+  color: black;
+  margin: 5px 5px 5px 5px;
+  padding: 5px;
+}
