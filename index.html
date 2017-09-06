@@ -6,8 +6,8 @@
 </head>
 <body>
 	<canvas width="640" height="480" id="canvas"></canvas>
-  <div align="center" class="resetFrame">
-    <button class="resetBtn" type="button" id="resetButton">RESTART</button>
+  <div class="resetFrame">
+    <button class="resetBtn" id="resetButton">RESTART</button>
   </div>
 	<script type="text/javascript" src="js/Arkanoid.js"></script>
 	<script type="text/javascript">
@@ -15,6 +15,9 @@
     	const button = document.getElementById('resetButton');
 		const arkanoid = new Arkanoid(canvas);
 		arkanoid.init();
+        button.addEventListener('click', ()=>{
+            arkanoid.resetCounters();
+		});
 	</script>
 </body>
 </html>

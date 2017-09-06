@@ -213,8 +213,4 @@ function Arkanoid(canvas) {
 		this.startGame();
 	});
 
-	button.addEventListener('click', () => {
-		this.resetCounters();
-	});
-
 };
