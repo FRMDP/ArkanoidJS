@@ -1,7 +1,7 @@
 /**
  * Objeto descriptor de las direcciones
  * de movimiento
- * 
+ *
  * @type Object
  */
 const Movement = {
@@ -14,7 +14,7 @@ const Movement = {
 
 /**
  * Función constructora de la nave espacial
- * 
+ *
  * @param int x      Posición de la nave en el eje x
  * @param int y      Posición de la nave en el eje y
  * @param int width  Tamaño de la nave en el eje x
@@ -29,7 +29,7 @@ function Vaus(x, y, width, height) {
 
 /**
  * Función constructora del proyectil
- * 
+ *
  * @param int x      Posición del proyectil en el eje x
  * @param int y      Posición del proyectil en el eje y
  * @param int radius Radio del proyectil
@@ -45,7 +45,7 @@ function Bullet(x, y, radius, dir) {
 
 /**
  * Función constructora del juego
- * 
+ *
  * @param Canvas canvas  Canvas donde se dibujará el juego
  */
 function Arkanoid(canvas) {
@@ -179,12 +179,13 @@ function Arkanoid(canvas) {
 	}
 
 	this.startGame = function () {
-		if (this.bullet.dir == Movement.NONE) {
+		if (this.bullet.dir == Movement.NONE && this.gameOver == false) {
 			this.bullet.dir = Movement.RIGHT + Movement.UP;
 		}
 	}
 
 	this.restartGame = function () {
+		this.gameOver = false;
 		this.bullet.dir = Movement.NONE;
 		this.bullet.x = this.vaus.x + this.vaus.width / 2;
 		this.bullet.y = this.vaus.y - this.bullet.radius * 2;
@@ -197,11 +198,19 @@ function Arkanoid(canvas) {
 		this.vaus.x = x;
 	}
 
+	this.resetCounters = function () {
+		LIVES = 3;
+		SCORE = 0;
+		this.vaus.x = ((canvas.width/2) - (this.vaus.width/2));
+		this.restartGame();
+	}
+
 	document.addEventListener('mousemove', (event) => {
 		this.setVausPosition(event.pageX);
 	});
 
-	document.addEventListener('click', () => {
+	canvas.addEventListener('click', () => {
 		this.startGame();
 	});
+
 };
