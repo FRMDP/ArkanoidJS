@@ -44,6 +44,32 @@ function Bullet(x, y, radius, dir) {
 }
 
 /**
+ * Función constructora de ladrillo
+ *
+ * @param int x      Posición del ladrillo en el eje x
+ * @param int y      Posición del ladrillo en el eje y
+ * @param int width  Tamaño del ladrillo en el eje x
+ * @param int height Tamaño del ladrillo en el eje y
+ */
+function Brick(x, y, width, height) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+};
+
+
+function Bricks(cant_horizontal, cant_vertical, brick_width, brick_height) {
+	this.bricks = new Array();
+	for (let i = 0; i < cant_vertical; i++) {
+		this.bricks[i] = new Array();
+		for (let j = 0; j < cant_horizontal; j++) {
+			this.bricks[i][j] = new Brick(j * brick_width, i * brick_height, brick_width, brick_height);
+		}
+	}
+}
+
+/**
  * Función constructora del juego
  *
  * @param Canvas canvas  Canvas donde se dibujará el juego
@@ -53,8 +79,11 @@ function Arkanoid(canvas) {
 	const VAUS_HEIGHT = 10;
 	const BULLET_SIZE = 3;
 	const BULLET_MAX_SPEED = 20;
+	const BRICK_WIDTH=60;
+	const BRICK_HEIGHT=20;
 	let LIVES = 3;
 	let SCORE = 0;
+	this.bricks = new Bricks(11, 8, BRICK_WIDTH, BRICK_HEIGHT);
 
 	this.init = function () {
 		if (!canvas.getContext) {
@@ -69,6 +98,7 @@ function Arkanoid(canvas) {
 		this.createElements();
 
 		setInterval(() => {
+			//this.collision();
 			this.update();
 			this.updateScore();
 			this.fullDraw();
@@ -92,6 +122,14 @@ function Arkanoid(canvas) {
 		this.context.fillRect(this.vaus.x, this.vaus.y, this.vaus.width, this.vaus.height);
 	}
 
+	this.drawBricks= function () {
+		for (let i = 0; i < this.bricks.bricks.length; i++) {
+			for (let j = 0; j < this.bricks.bricks[i].length; j++) {
+					this.context.fillRect(this.bricks.bricks[i][j].x, this.bricks.bricks[i][j].y+60, this.bricks.bricks[i][j].width -5 , this.bricks.bricks[i][j].height -5);
+			}
+		}
+	}
+
 	this.fullDraw = function () {
 		this.context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -102,6 +140,8 @@ function Arkanoid(canvas) {
 		this.drawBullet();
 
 		this.drawVaus();
+
+		this.drawBricks();
 
 		this.writeText('Lives: ' + parseInt(LIVES), 10, 20);
 
@@ -165,6 +205,21 @@ function Arkanoid(canvas) {
 			this.bullet.y = this.vaus.y - this.bullet.radius * 2;
 		}
 	}
+
+	this.collision= function(){
+		for (let i = 0; i < this.bricks.bricks.length; i++) {
+			for (let j = 0; j < this.bricks.bricks[i].length; j++) {
+				if ((this.bullet.x + this.bullet.radius > this.bricks.bricks[i][j].x &&
+				this.bullet.x - this.bullet.radius < this.bricks.bricks[i][j].x + this.bricks.bricks[i][j].width) &&
+				(this.bullet.y + this.bullet.radius > this.bricks.bricks[i][j].y &&
+				this.bullet.y - this.bullet.radius < this.bricks.bricks[i][j].y + this.bricks.bricks[i][j].height)){
+					console.log("muerto");
+				}
+				console.log("no se cumple el if");	
+			}
+		}	
+	}
+
 
 	this.updateScore = function () {
 		if (this.bullet.dir != Movement.NONE) {
