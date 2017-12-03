@@ -44,6 +44,33 @@ function Bullet(x, y, radius, dir) {
 }
 
 /**
+ * Función constructora de ladrillo
+ *
+ * @param int x      Posición del ladrillo en el eje x
+ * @param int y      Posición del ladrillo en el eje y
+ * @param int width  Tamaño del ladrillo en el eje x
+ * @param int height Tamaño del ladrillo en el eje y
+ */
+function Brick(x, y, width, height) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.status=1;
+};
+
+
+function Bricks(cant_horizontal, cant_vertical, brick_width, brick_height) {
+	this.bricks = new Array();
+	for (let c = 0; c < cant_vertical; c++) {
+		this.bricks[c] = new Array();
+		for (let r = 0; r < cant_horizontal; r++) {
+			this.bricks[c][r] = new Brick(r * brick_width, c * brick_height, brick_width, brick_height);
+		}
+	}
+}
+
+/**
  * Función constructora del juego
  *
  * @param Canvas canvas  Canvas donde se dibujará el juego
@@ -53,6 +80,12 @@ function Arkanoid(canvas) {
 	const VAUS_HEIGHT = 10;
 	const BULLET_SIZE = 3;
 	const BULLET_MAX_SPEED = 20;
+	const BRICK_WIDTH=59;
+	const BRICK_HEIGHT=20;
+	const BRICK_COLUMN=11;
+	const BRICK_ROWS=8;
+	const BRICK_ROOF_SPACE=60;
+	const BRICK_SPACE_BETWEEN=5;
 	let LIVES = 3;
 	let SCORE = 0;
 
@@ -69,6 +102,7 @@ function Arkanoid(canvas) {
 		this.createElements();
 
 		setInterval(() => {
+			//this.collision();
 			this.update();
 			this.updateScore();
 			this.fullDraw();
@@ -78,6 +112,8 @@ function Arkanoid(canvas) {
 	this.createElements = function () {
 		this.vaus = new Vaus(canvas.width / 2 - VAUS_WIDTH / 2, canvas.height - 20, VAUS_WIDTH, VAUS_HEIGHT);
 		this.bullet = new Bullet(canvas.width / 2, canvas.height / 2, BULLET_SIZE, Movement.NONE);
+		this.bricks = new Bricks(BRICK_COLUMN, BRICK_ROWS, BRICK_WIDTH, BRICK_HEIGHT);
+
 	}
 
 	this.drawBullet = function () {
@@ -92,6 +128,14 @@ function Arkanoid(canvas) {
 		this.context.fillRect(this.vaus.x, this.vaus.y, this.vaus.width, this.vaus.height);
 	}
 
+	this.drawBricks= function () {
+		for (let c = 0; c < this.bricks.bricks.length; c++) {
+			for (let r = 0; r < this.bricks.bricks[c].length; r++) {
+					this.context.fillRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y +BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width -BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height-BRICK_SPACE_BETWEEN);
+			}
+		}
+	}
+
 	this.fullDraw = function () {
 		this.context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -102,6 +146,8 @@ function Arkanoid(canvas) {
 		this.drawBullet();
 
 		this.drawVaus();
+
+		this.drawBricks();
 
 		this.writeText('Lives: ' + parseInt(LIVES), 10, 20);
 
@@ -164,6 +210,74 @@ function Arkanoid(canvas) {
 			this.bullet.x = this.vaus.x + this.vaus.width / 2;
 			this.bullet.y = this.vaus.y - this.bullet.radius * 2;
 		}
+
+
+for (let c = 0; c < this.bricks.bricks.length; c++) {
+			for (let r = 0; r < this.bricks.bricks[c].length; r++) {
+				if (this.bricks.bricks[c][r] !=null) {
+					if (this.bullet.dir == Movement.LEFT + Movement.UP) {
+						if (this.brickCollision(this.bullet.x - this.bullet.speed, this.bullet.y , this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y, this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.RIGHT + Movement.LEFT;
+							return;
+						}
+						if (this.brickCollision(this.bullet.x, this.bullet.y - this.bullet.speed, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y , this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.UP + Movement.DOWN;
+							return;
+						}
+					} else if (this.bullet.dir == Movement.LEFT + Movement.DOWN) {
+						if (this.brickCollision(this.bullet.x - this.bullet.speed, this.bullet.y, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y , this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.LEFT + Movement.RIGHT;
+							return;
+						}
+						if (this.brickCollision(this.bullet.x, this.bullet.y + this.bullet.speed, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y , this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.UP + Movement.DOWN;
+							return;
+						}
+					} else if (this.bullet.dir == Movement.RIGHT + Movement.UP) {
+						if (this.brickCollision(this.bullet.x + this.bullet.speed, this.bullet.y, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y , this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.RIGHT + Movement.LEFT;
+							return;
+						}
+						if (this.brickCollision(this.bullet.x, this.bullet.y - this.bullet.speed, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y , this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.UP + Movement.DOWN;
+							return;
+						}
+					} else if (this.bullet.dir == Movement.RIGHT + Movement.DOWN) {
+						if (this.brickCollision(this.bullet.x + this.bullet.speed, this.bullet.y, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y, this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.RIGHT + Movement.LEFT;
+							return;
+						}
+						if (this.brickCollision(this.bullet.x, this.bullet.y + this.bullet.speed, this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y, this.bricks.bricks[c][r].width, this.bricks.bricks[c][r].height)) {
+							this.context.clearRect(this.bricks.bricks[c][r].x, this.bricks.bricks[c][r].y + BRICK_ROOF_SPACE, this.bricks.bricks[c][r].width - BRICK_SPACE_BETWEEN, this.bricks.bricks[c][r].height - BRICK_SPACE_BETWEEN);
+							this.bricks.bricks[c].splice(r,1);
+							this.bullet.dir=this.bullet.dir -Movement.UP + Movement.DOWN;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	this.brickCollision=function(bulletx,bullety,brickx,bricky,brick_width,brick_height){
+		if ((bulletx > brickx && bulletx < brickx + brick_width - BRICK_SPACE_BETWEEN) &&
+			(bullety > bricky + BRICK_ROOF_SPACE && bullety < bricky + BRICK_ROOF_SPACE + brick_height- BRICK_SPACE_BETWEEN))
+			return true;
+		return false;
 	}
 
 	this.updateScore = function () {
